@@ -23,7 +23,7 @@ app.use(bodyParser.urlencoded({extended: true }));
 app.use("/", routes);
 
 
-app.set("port", process.env.PORT || 80);
+app.set("port", process.env.PORT || 8080);
 
 server.listen(app.get("port"), function() {
   console.log("Server started on port " + app.get("port"));
