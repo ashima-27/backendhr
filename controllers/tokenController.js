@@ -7,9 +7,13 @@ const { initializeApp } = require('firebase/app');
 const { getMessaging } = require('firebase/messaging');
 const admin = require("firebase-admin");
 
+const path = require('path');
 // Read the JSON file
-const configFile = fs.readFileSync('../config/serviceAccountKey.json', 'utf8');
+// const configFile = fs.readFileSync('../config/serviceAccountKey.json', 'utf8');
+const serviceAccountKeyPath = path.resolve(__dirname, '../config/serviceAccountKey.json');
+console.log(`Resolved path to serviceAccountKey.json: ${serviceAccountKeyPath}`);
 
+const configFile = fs.readFileSync(serviceAccountKeyPath, 'utf8');
 // Parse the JSON file
 let firebaseConfig = JSON.parse(configFile);
 
