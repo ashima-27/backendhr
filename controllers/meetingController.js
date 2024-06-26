@@ -86,13 +86,15 @@ async function scheduleMeeting(req, res) {
 
     <p>You are invited to attend the <strong>${req.body.title}</strong> </p>
 
-    <p><strong>Date:</strong> ${req.body.startTime}<br>
-    <strong>Time:</strong> ${req.body.endTime}<br>
+    <p>
+     <strong>Date:</strong> ${moment(req.body.date).format('YYYY-MM-DD')}<br>
+    <strong>Start Time:</strong> ${moment(req.body.startTime).format('HH:mm')}<br>
+    <strong>End Time:</strong> ${moment(req.body.endTime).format('HH:mm')}<br>
     <strong>Location:</strong> ${req.body.link}</p>
 
     <h3>Action Required:</h3>
   <p>
-    If you cannot attend, please inform <strong>[Contact Person]</strong> at <a href="mailto:${req.body.from}">${req.body.from}</a>.</p>
+    If you cannot attend, please inform <strong>Contact Person</strong> at <a href="mailto:${req.body.from}">${req.body.from}</a>.</p>
 
     <p>Best regards,<br>
    ${req.body.from}
