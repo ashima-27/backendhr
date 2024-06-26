@@ -156,14 +156,15 @@ async function createBlog (req, res) {
       )}
      
       
-      req.body.body = obj.blog_Title;
-      const notifyResult = await notify(req.body.blog_Title , req.body.blog_Description);
-      console.log('Notify Result:', notifyResult);
-
-      respObj.IsSuccess = true
-      respObj.Message = 'Blog Created from Draft Successfully'
-      res.status(200).json(respObj)
+     
     }
+    req.body.body = obj.blog_Title;
+    const notifyResult = await notify(req.body.blog_Title , req.body.blog_Description);
+    console.log('Notify Result:', notifyResult);
+
+    respObj.IsSuccess = true
+    respObj.Message = 'Blog Created from Draft Successfully'
+    res.status(200).json(respObj)
   } catch (err) {
     respObj.error = err
     ;(respObj.Message = err.message || 'Error while processing db query'),
