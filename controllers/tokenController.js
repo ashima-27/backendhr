@@ -108,6 +108,7 @@ async function saveToken (req, res)  {
 //   }
 async function notify(req, res) {
   try {
+    console.log("hi i m workig ")
     const { title, body } = req.body;
     const tokens = await Token.find({}).select('token -_id').lean();
     if (!tokens.length) {
