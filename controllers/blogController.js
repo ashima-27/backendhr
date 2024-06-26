@@ -1,5 +1,6 @@
 const Blog = require('../models/blog')
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const { notify } = require('./tokenController');
 const ObjectId = require('mongoose').Types.ObjectId;
 
 async function getAllBlogs (req, res) {
@@ -152,6 +153,10 @@ async function createBlog (req, res) {
         { new: true },
       
       )}
+     
+      const notifyResult = await notify(newBlog.blog_Title, 'New blog created');
+      console.log('Notify Result:', notifyResult);
+
       respObj.IsSuccess = true
       respObj.Message = 'Blog Created from Draft Successfully'
       res.status(200).json(respObj)

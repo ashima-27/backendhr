@@ -126,14 +126,12 @@ async function notify(req, res) {
 
     console.log("Messages:", messages);
 
-    // Send messages using Firebase Admin SDK
-    const response = await admin.messaging().sendAll(messages);
+ const response = await admin.messaging().sendAll(messages);
 
-    // Log the detailed response
+
     console.log('Successfully sent messages:', response);
 
-    // Check for any failed messages and handle them appropriately
-    const failedMessages = response.responses.filter(resp => !resp.success);
+   const failedMessages = response.responses.filter(resp => !resp.success);
     if (failedMessages.length > 0) {
       failedMessages.forEach((resp, idx) => {
         console.error(`Error sending message to token ${messages[idx].token}:`, resp.error);
