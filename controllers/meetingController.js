@@ -1,6 +1,7 @@
 const Meet = require("../models/meeting");
 const mongoose = require("mongoose");
 const moment2 = require('moment');
+const Employees=require("../models/Employee")
 //generate google link
 const sendEmail = require("../config/nodeMailer");
 const moment = require("moment-timezone");
@@ -69,12 +70,17 @@ async function scheduleMeeting(req, res) {
       createdBy:req.params.id
     });
  
-  
+    const attendeeIds = req.body.sendTo.map(id => new ObjectId(id));
+    const attendees = await Employees.find({ _id: { $in: attendeeIds } }).select('email -_id').lean();
+    
+    if (!attendees.length) {
+      return res.status(400).json({ message: 'No attendees found' });
+    }
      // Send emails to all attendees
-     const emailPromises = req.body.sendTo.map(email => {
+     const emailPromises = attendees.map(attende => {
       const emailData = {
         fromEmail: req.body.from,
-        toEmail: email,
+        toEmail: attende.email,
         htmlContent: `
         <!DOCTYPE html>
         <html lang="en">
@@ -85,7 +91,7 @@ async function scheduleMeeting(req, res) {
         </head>
         <body>
             <p><strong>Subject:</strong> ${title}</p>
-            <p>Dear ${email},</p>
+            <p>Dear ${attende.email},</p>
             <p>You are invited to attend the <strong>${title}</strong> meeting.</p>
             <p>
             <strong>Date:</strong> ${moment2(date).format('YYYY-MM-DD')}<br>
