@@ -25,7 +25,7 @@ async function createUser(req, res) {
       return res.status(409).json("Employee Already Exists!");
     } else {
       const hashedPassword = await bcrypt.hash(password, 10); 
-      const newUser = new Employee({ email, password: hashedPassword ,  empId: newEmpId},); 
+      const newUser = new Employee({ email, password: hashedPassword ,  empId: newEmpId,role:req.body.permission,positionId:req.body.role}); 
       const result = await newUser.save();
       if (result) {
         return res
