@@ -329,7 +329,7 @@ async function getAllMeetingsById(req, res) {
     const allmeet = await Meet.aggregate([
       {
         $match: matchStage, // Assuming matchStage is defined elsewhere
-     sendTo: { $elemMatch: { $eq: id } }
+     sendTo: { $in: [id] } 
       },
       {
         
