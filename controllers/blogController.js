@@ -140,9 +140,7 @@ async function createBlog (req, res) {
 
     if (req.body.Draft === false && req.body.blogId === "") {
       let newBlog = await new Blog(obj).save()
-      const notifyResult = await notify(newBlog.blog_Title, 'New blog created');
-      console.log('Notify Result:', notifyResult);
-
+    
       respObj.IsSuccess = true
       respObj.Message = 'Blog Created Successfully'
       respObj.Data = newBlog
@@ -157,7 +155,11 @@ async function createBlog (req, res) {
       
       )}
      
-    
+      req.body.title = 'New blog created';
+      req.body.body = obj.blog_Title;
+      const notifyResult = await notify(req.body.title , req.body.body);
+      console.log('Notify Result:', notifyResult);
+
       respObj.IsSuccess = true
       respObj.Message = 'Blog Created from Draft Successfully'
       res.status(200).json(respObj)
