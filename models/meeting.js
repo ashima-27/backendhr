@@ -7,8 +7,13 @@ const meetingSchema = new mongoose.Schema(
     endTime:{type: Date},
     date:{type:Date},
     meetLink:{type:String},
-    // createdBy:{type:ObjectId},
-    createdAt: { type: Date, default: Date.now }
+    createdBy:{  type: mongoose.Schema.Types.ObjectId,
+      ref: 'Employee'},
+    createdAt: { type: Date, default: Date.now },
+    sendTo:{type:String},
+    from :{
+      type:String
+    }
   },
   
 );

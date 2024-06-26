@@ -21,7 +21,7 @@ router.post("/addEmployee", upload.single("image"), employeeCtrl.addEmployee);
 router.get("/getAllEmployees",employeeCtrl.getAllEmployee);
 router.post("/save-token",tokenCtrl.saveToken);
 router.post("/notify",tokenCtrl.notify);
-router.post("/scheduleMeeting",meetCtrl.scheduleMeeting);
+router.post("/:id/scheduleMeeting",meetCtrl.scheduleMeeting);
 router.get("/getAllMeeting",meetCtrl.getAllMeetings);
 router.post("/:id/raiseTicket",ticketCtrl.raiseTicket);
 router.get("/getAllTicket",ticketCtrl.getAllTicket);

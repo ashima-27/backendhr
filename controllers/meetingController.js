@@ -63,6 +63,9 @@ async function scheduleMeeting(req, res) {
       endTime: endTime,
       meetLink: link,
       date: date,
+      from :req.body.from,
+      sendTo:req.body.sendTo,
+      createdBy:req.params.id
     });
 
     await meeting.save();
