@@ -72,7 +72,7 @@ async function getAllEmployee(req, res) {
                 ],
               },
             },
-            { $sort: { empId: 1 } },
+            { $sort: { empId: -1 } },
             { $skip: offset },
             { $limit: ITEMS_PER_PAGE },
           ],
