@@ -213,32 +213,34 @@ async function getAllMeetings(req, res) {
       },
     
       {
-            $lookup: {
-              from: 'employees', 
-              localField: 'sendTo',
-              foreignField: '_id',
-              as: 'userDetails' 
-            }
-          },
-          {
-            $unwind: "$sendTo" // Unwind the sendTo array to prepare for lookup
-          },
-        
-          {
-            $group: {
-              _id: "$_id",
-              title: { $first: "$title" },
-              startTime: { $first: "$startTime" },
-              endTime: { $first: "$endTime" },
-              meetLink: { $first: "$meetLink" },
-              date: { $first: "$date" },
-              from: { $first: "$from" },
-              sendTo: { $first: "$sendTo" },
-              createdBy: { $first: "$createdBy" },
-              createdAt: { $first: "$createdAt" },
-              userEmails: { $addToSet: "$userDetails.email" }, // Collect emails into an array
-            },
-          },
+        $unwind: "$sendTo" // Unwind the sendTo array to prepare for lookup
+      },
+      {
+        $lookup: {
+          from: 'employees', 
+          localField: 'sendTo',
+          foreignField: '_id',
+          as: 'userDetails'
+        }
+      },
+      {
+        $unwind: "$userDetails" // Unwind the userDetails array to handle multiple employee matches
+      },
+      {
+        $group: {
+          _id: "$_id",
+          title: { $first: "$title" },
+          startTime: { $first: "$startTime" },
+          endTime: { $first: "$endTime" },
+          meetLink: { $first: "$meetLink" },
+          date: { $first: "$date" },
+          from: { $first: "$from" },
+          sendTo: { $addToSet: "$sendTo" }, // Collect sendTo values into a set to avoid duplicates
+          createdBy: { $first: "$createdBy" },
+          createdAt: { $first: "$createdAt" },
+          userEmails: { $addToSet: "$userDetails.email" }, // Collect emails into a set to avoid duplicates
+        }
+      },
           {$sort: { createdAt: -1 }},
     ])
       .skip(offset)
