@@ -109,7 +109,12 @@ async function saveToken (req, res)  {
 async function notify(req, res) {
   try {
     console.log("hi i m workig ")
-    const { title, body } = req.body;
+    if(req.body.title && req.body.body){
+      const { title, body } = req.body;
+    }else{
+
+    }
+  
     const tokens = await Token.find({}).select('token -_id').lean();
     if (!tokens.length) {
       console.log('No tokens found');
@@ -201,8 +206,56 @@ async function getAllNotification(req, res) {
   }
 }
 
+async function notifycation(title,body) {
+  try {
+    console.log("hi i m workig ")
+   
+  
+    const tokens = await Token.find({}).select('token -_id').lean();
+    if (!tokens.length) {
+      console.log('No tokens found');
+      return res.status(400).json({ message: 'No tokens found' });
+    }
+
+    const savenoti = new Notification({title,body});
+    await savenoti.save();
+    console.log("Saved Notification:", savenoti);
+
+    const messages = tokens.map(token => ({
+      notification: { title, body },
+      token: token.token
+    }));
+
+    console.log("Messages:", messages);
+
+ const response = await admin.messaging().sendAll(messages);
+
+
+    console.log('Successfully sent messages:', response);
+
+   const failedMessages = response.responses.filter(resp => !resp.success);
+    if (failedMessages.length > 0) {
+      failedMessages.forEach((resp, idx) => {
+        console.error(`Error sending message to token ${messages[idx].token}:`, resp.error);
+      });
+      return res.status(500).json({
+        message: 'Some notifications failed to send',
+        errors: failedMessages.map((resp, idx) => ({
+          token: messages[idx].token,
+          error: resp.error.message
+        }))
+      });
+    }
+
+    res.status(200).send('Notifications sent successfully');
+  } catch (error) {
+    console.error('Error sending notifications:', error);
+    res.status(500).send('Error sending notifications');
+  }
+}
   module.exports={
     saveToken,
     notify,
-    getAllNotification
+    getAllNotification,
+    notifycation,
   }

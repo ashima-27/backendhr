@@ -157,9 +157,9 @@ async function createBlog (req, res) {
      
      
     }
-    req.body.title = 'New blog created';
-    req.body.body = obj.blog_Title;
-    const notifyResult = await notify(req.body.title , req.body.body);
+    let msg = 'New blog created';
+   
+    const notifyResult = await notify.notifycation(req.body.blog_Title,msg);
     console.log('Notify Result:', notifyResult);
 
     respObj.IsSuccess = true
