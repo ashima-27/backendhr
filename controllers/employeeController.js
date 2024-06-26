@@ -19,7 +19,8 @@ async function addEmployee(req, res) {
     let isUser = await Employee.findOne({ email });
     const highestEmp = await Employee.findOne().sort('-empId').exec();
     const newEmpId = highestEmp ? highestEmp.empId + 1 : 1916067;
-
+    const hashedPassword = await bcrypt.hash(password, 10); 
+    
     if (isUser) {
       return res.status(409).json(respObj.Message="Employee Already Exists!");
     } else {
@@ -29,7 +30,8 @@ async function addEmployee(req, res) {
         image: picname,
         positionId: role,
         departmentId: department,
-        empId: newEmpId,role:req.body.permission,positionId:req.body.role
+        empId: newEmpId,role:req.body.permission,positionId:req.body.role,
+        password:hashedPassword
       });
 
       const savedEmployee = await newEmployee.save();
