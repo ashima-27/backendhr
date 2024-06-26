@@ -211,9 +211,11 @@ async function updateBlog (req, res) {
       // blog_CreatedBy: req.body.blog_CreatedBy,
       blog_Body: req.body.blog_Body,
       blog_Type: req.body.blog_Type,
-      smallImage: req.body.smallImage,
+      blog_wordCount:req.body.wordCount ,
+      blog_readingTime:req.body.readingTime ,
+    
       blog_description: req.body.blog_Description,
-      thumbNail: req.body.thumbnail,
+      image: req.body.image,
       tags:req.body.selectedTag,
     }
     let result = await Blog.findOneAndUpdate(
