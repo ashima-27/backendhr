@@ -50,7 +50,7 @@ async function createMeeting(title, startTime, endTime) {
 
 async function scheduleMeeting(req, res) {
   try {
-    const { title, startTime, endTime, link, date } = req.body;
+    const { title, startTime, endTime, link, date ,from ,sendTo } = req.body;
     console.log("1", req.body);
 
     if (!title || !startTime || !endTime) {
