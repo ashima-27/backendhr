@@ -129,10 +129,45 @@ async function updateMeeting(req,res){
   
       let result = await Meet.findOneAndUpdate(
         { _id: id },
-        { $set: { ...req.body ,meetLink:req.body.link } }, // Update the image field in the database
+        { $set: { ...req.body ,meetLink:req.body.link } },
         { new: true }
       );
       console.log("up",respObj)
+      const sendTo = result.sendTo;
+      const emailPromises = sendTo.map(email => {
+        const emailData = {
+          fromEmail: result.from,
+          toEmail: email,
+          htmlContent: `
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>${result.title}</title>
+          </head>
+          <body>
+              <p><strong>Subject:</strong> ${result.title}</p>
+              <p>Dear ${email},</p>
+              <p>The details for the meeting <strong>${result.title}</strong> have been updated.</p>
+              <p>
+              <strong>Date:</strong> ${moment2(result.date).format('YYYY-MM-DD')}<br>
+              <strong>Start Time:</strong> ${moment2(result.startTime).format('HH:mm')}<br>
+              <strong>End Time:</strong> ${moment2(result.endTime).format('HH:mm')}<br>
+              <strong>Location:</strong> <a href="${result.meetLink}">${result.meetLink}</a></p>
+              <h3>Action Required:</h3>
+              <p>If you cannot attend, please inform <strong>${result.from}</strong> at <a href="mailto:${result.from}">${result.from}</a>.</p>
+              <p>Best regards,<br>
+              ${result.from}</p>
+          </body>
+          </html>
+          `,
+          subject: `Updated Meeting Invitation: ${result.title}`
+        };
+        return sendEmail(emailData);
+      });
+  
+      await Promise.all(emailPromises);
       respObj.IsSuccess = true;
       respObj.Data = result;
       respObj.Message = "Meeting Details Updated Successfully ";
