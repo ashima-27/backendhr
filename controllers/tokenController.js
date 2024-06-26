@@ -109,11 +109,7 @@ async function saveToken (req, res)  {
 async function notify(req, res) {
   try {
     console.log("hi i m workig ")
-    if(req.body.title && req.body.body){
-      const { title, body } = req.body;
-    }else{
-
-    }
+   const {title,body} =req.body
   
     const tokens = await Token.find({}).select('token -_id').lean();
     if (!tokens.length) {
@@ -121,7 +117,7 @@ async function notify(req, res) {
       return res.status(400).json({ message: 'No tokens found' });
     }
 
-    const savenoti = new Notification(req.body);
+    const savenoti = new Notification({title,body});
     await savenoti.save();
     console.log("Saved Notification:", savenoti);
 
