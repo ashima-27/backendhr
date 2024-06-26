@@ -1,6 +1,6 @@
 const Meet = require("../models/meeting");
 const mongoose = require("mongoose");
-// const moment = require('moment');
+const moment2 = require('moment');
 //generate google link
 const sendEmail = require("../config/nodeMailer");
 const moment = require("moment-timezone");
@@ -87,9 +87,9 @@ async function scheduleMeeting(req, res) {
     <p>You are invited to attend the <strong>${req.body.title}</strong> </p>
 
     <p>
-     <strong>Date:</strong> ${moment(req.body.date).format('YYYY-MM-DD')}<br>
-    <strong>Start Time:</strong> ${moment(req.body.startTime).format('HH:mm')}<br>
-    <strong>End Time:</strong> ${moment(req.body.endTime).format('HH:mm')}<br>
+     <strong>Date:</strong> ${moment2(req.body.date).format('YYYY-MM-DD')}<br>
+    <strong>Start Time:</strong> ${moment2(req.body.startTime).format('HH:mm')}<br>
+    <strong>End Time:</strong> ${moment2(req.body.endTime).format('HH:mm')}<br>
     <strong>Location:</strong> ${req.body.link}</p>
 
     <h3>Action Required:</h3>
