@@ -328,8 +328,10 @@ async function getAllMeetingsById(req, res) {
    let id=  new ObjectId(req.params.id);
     const allmeet = await Meet.aggregate([
       {
-        $match: matchStage, // Assuming matchStage is defined elsewhere
-     sendTo: { $in: [id] } 
+        $match: {
+          ...matchStage,  // Assuming matchStage is defined elsewhere and is a valid query object
+          sendTo: { $in: [id] }  // Use $in operator to match id in the sentto array
+        }
       },
       {
         
