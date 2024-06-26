@@ -202,9 +202,9 @@ async function getAllNotification(req, res) {
   }
 }
 
-async function notifycation(title,body) {
+async function notifycation({title,body}) {
   try {
-    console.log("hi i m workig ")
+    console.log("hi i m workig ",title,body)
    
   
     const tokens = await Token.find({}).select('token -_id').lean();
