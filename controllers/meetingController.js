@@ -222,21 +222,21 @@ async function getAllMeetings(req, res) {
           // {
           //   $unwind: "$userDetails", // Unwind the array of user details
           // },
-          // {
-          //   $group: {
-          //     _id: "$_id",
-          //     title: { $first: "$title" },
-          //     startTime: { $first: "$startTime" },
-          //     endTime: { $first: "$endTime" },
-          //     meetLink: { $first: "$meetLink" },
-          //     date: { $first: "$date" },
-          //     from: { $first: "$from" },
-          //     sendTo: { $first: "$sendTo" },
-          //     createdBy: { $first: "$createdBy" },
-          //     createdAt: { $first: "$createdAt" },
-          //     userEmails: { $addToSet: "$userDetails.email" }, // Collect emails into an array
-          //   },
-          // },
+          {
+            $group: {
+              _id: "$_id",
+              title: { $first: "$title" },
+              startTime: { $first: "$startTime" },
+              endTime: { $first: "$endTime" },
+              meetLink: { $first: "$meetLink" },
+              date: { $first: "$date" },
+              from: { $first: "$from" },
+              sendTo: { $first: "$sendTo" },
+              createdBy: { $first: "$createdBy" },
+              createdAt: { $first: "$createdAt" },
+              userEmails: { $addToSet: "$userDetails.email" }, // Collect emails into an array
+            },
+          },
           {$sort: { createdAt: -1 }},
     ])
       .skip(offset)
