@@ -212,6 +212,9 @@ async function getAllMeetings(req, res) {
         $match: matchStage
       },
       {
+        $unwind: "$sendTo" // Unwind the sendTo array to prepare for lookup
+      },
+      {
             $lookup: {
               from: 'employees', 
               localField: 'sendTo',
@@ -219,9 +222,7 @@ async function getAllMeetings(req, res) {
               as: 'userDetails' 
             }
           },
-          {
-            $unwind: "$userDetails", // Unwind the array of user details
-          },
+        
           {
             $group: {
               _id: "$_id",
