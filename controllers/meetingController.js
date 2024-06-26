@@ -71,7 +71,7 @@ async function scheduleMeeting(req, res) {
  
   
      // Send emails to all attendees
-     const emailPromises = sendTo.map(email => {
+     const emailPromises = req.body.sendTo.map(email => {
       const emailData = {
         fromEmail: from,
         toEmail: email,
