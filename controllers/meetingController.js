@@ -69,42 +69,44 @@ async function scheduleMeeting(req, res) {
       createdBy:req.params.id
     });
  
-    let emailData={
-      fromEmail :req.body.from,
-      toEmail:req.body.sendTo,
-      htmlContent:`<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${req.body.title}</title>
-</head>
-<body>
-    <p><strong>Subject:</strong> ${req.body.title}</p>
+  
+     // Send emails to all attendees
+     const emailPromises = sendTo.map(email => {
+      const emailData = {
+        fromEmail: from,
+        toEmail: email,
+        htmlContent: `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>${title}</title>
+        </head>
+        <body>
+            <p><strong>Subject:</strong> ${title}</p>
+            <p>Dear ${email},</p>
+            <p>You are invited to attend the <strong>${title}</strong> meeting.</p>
+            <p>
+            <strong>Date:</strong> ${moment2(date).format('YYYY-MM-DD')}<br>
+            <strong>Start Time:</strong> ${moment2(startTime).format('HH:mm')}<br>
+            <strong>End Time:</strong> ${moment2(endTime).format('HH:mm')}<br>
+            <strong>Location:</strong> <a href="${link}">${link}</a></p>
+            <h3>Action Required:</h3>
+            <p>If you cannot attend, please inform <strong>${from}</strong> at <a href="mailto:${from}">${from}</a>.</p>
+            <p>Best regards,<br>
+            ${from}</p>
+        </body>
+        </html>
+        `,
+        subject: `Meeting Invitation: ${title}`
+      };
+      return sendEmail(emailData);
+    });
 
-    <p>Dear ${req.body.sendTo},</p>
+    // Wait for all emails to be sent
+    await Promise.all(emailPromises);
 
-    <p>You are invited to attend the <strong>${req.body.title}</strong> </p>
-
-    <p>
-     <strong>Date:</strong> ${moment2(req.body.date).format('YYYY-MM-DD')}<br>
-    <strong>Start Time:</strong> ${moment2(req.body.startTime).format('HH:mm')}<br>
-    <strong>End Time:</strong> ${moment2(req.body.endTime).format('HH:mm')}<br>
-    <strong>Location:</strong> ${req.body.link}</p>
-
-    <h3>Action Required:</h3>
-  <p>
-    If you cannot attend, please inform <strong>Contact Person</strong> at <a href="mailto:${req.body.from}">${req.body.from}</a>.</p>
-
-    <p>Best regards,<br>
-   ${req.body.from}
- 
-</body>
-</html>
-`,
-      subject: `Meeting for ${req.body.title}`
-    }
-    await sendEmail(emailData);
     await meeting.save();
     console.log("4", meeting.startTime);
 

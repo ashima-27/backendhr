@@ -10,7 +10,7 @@ const meetingSchema = new mongoose.Schema(
     createdBy:{  type: mongoose.Schema.Types.ObjectId,
       ref: 'Employee'},
     createdAt: { type: Date, default: Date.now },
-    sendTo:{type:String},
+    sendTo:{type:[String]},
     from :{
       type:String
     }
