@@ -1,6 +1,6 @@
 const Blog = require('../models/blog')
 const mongoose = require('mongoose');
-const { notify } = require('./tokenController');
+const  notify = require('./tokenController');
 const ObjectId = require('mongoose').Types.ObjectId;
 
 async function getAllBlogs (req, res) {
