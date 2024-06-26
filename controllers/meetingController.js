@@ -206,12 +206,43 @@ async function getAllMeetings(req, res) {
       },
     };
 
-    // Fetch paginated meetings
-    const allmeet = await Meet.find(matchStage)
+ 
+    const allmeet = await Meet.aggregate([
+      {
+        $match: matchStage
+      },
+      {
+            $lookup: {
+              from: 'employees', 
+              localField: 'sendTo',
+              foreignField: '_id',
+              as: 'userDetails' 
+            }
+          },
+          {
+            $unwind: "$userDetails", // Unwind the array of user details
+          },
+          {
+            $group: {
+              _id: "$_id",
+              title: { $first: "$title" },
+              startTime: { $first: "$startTime" },
+              endTime: { $first: "$endTime" },
+              meetLink: { $first: "$meetLink" },
+              date: { $first: "$date" },
+              from: { $first: "$from" },
+              sendTo: { $first: "$sendTo" },
+              createdBy: { $first: "$createdBy" },
+              createdAt: { $first: "$createdAt" },
+              userEmails: { $addToSet: "$userDetails.email" }, // Collect emails into an array
+            },
+          },
+          {$sort: { createdAt: -1 }},
+    ])
       .skip(offset)
       .limit(ITEMS_PER_PAGE);
 
-    // Calculate total number of meetings for pagination
+   
     const totalMeetingResult = await Meet.aggregate([
       {
         $match: matchStage,
