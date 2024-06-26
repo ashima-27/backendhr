@@ -304,9 +304,68 @@ async function deleteMeeting(req,res){
 
 }
 
+async function getAllMeetingsById(req, res) {
+  let respObj = {
+    Data: null,
+    totalMeeting: 0,
+  };
+
+  try {
+    const ITEMS_PER_PAGE = parseInt(req.query.pageCount)  || 10// Default to 10 items per page if not specified
+    const page = parseInt(req.query.pageNumber) || 1;
+    const offset = (page - 1) * ITEMS_PER_PAGE;
+    let fromDate = req.query.fromDate ? new Date(req.query.fromDate) : moment().startOf('month').toDate();
+    let toDate = req.query.toDate ? new Date(req.query.toDate + " 23:59:59") : moment().endOf('month').toDate();
+    console.log(fromDate,toDate)
+    console.log(req.query,"allData")
+    let matchStage = {
+      createdAt: {
+        $gte: fromDate,
+        $lte: toDate,
+      },
+    };
+
+   let id=  new ObjectId(req.params.id);
+    const allmeet = await Meet.aggregate([
+      {
+        $match: matchStage, // Assuming matchStage is defined elsewhere
+     sendTo: { $elemMatch: { $eq: id } }
+      },
+      {
+        
+      },
+      { $sort: { createdAt: -1 } },
+      { $skip: offset },
+      { $limit: ITEMS_PER_PAGE }
+    ]);
+    
+    console.log(allmeet); // Output the result to check if userDetails are populated
+    
+   
+    const totalMeetingResult = await Meet.aggregate([
+      {
+        $match: matchStage,
+      },
+      {
+        $count: "totalMeeting",
+      },
+    ]);
+
+    const totalMeeting = totalMeetingResult.length > 0 ? totalMeetingResult[0].totalMeeting : 0;
+
+    respObj.Data = allmeet;
+    respObj.totalMeeting = totalMeeting;
+
+    res.status(200).json(respObj);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
   scheduleMeeting,
   getAllMeetings,
   updateMeeting,
-  deleteMeeting
+  deleteMeeting,
+  getAllMeetingsById
 };

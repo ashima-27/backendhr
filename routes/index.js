@@ -30,6 +30,7 @@ router.put("/:id/updateTicket",ticketCtrl.updateTicket);
 router.put("/:id/deleteTicket",ticketCtrl.deleteTicket);
 router.put("/:id/:status/makeActiveInactive",employeeCtrl.makeActiveInactive);
 router.get('/:id/getEmployeeById', employeeCtrl.getEmployeeById);
+router.get("/:id/getAllMeetingById",meetCtrl.getAllMeetingsById);
 
 router.get('/getAllDepartments', employeeCtrl.getAllDepartments);
 router.get('/:departmentId/getAllPositions', employeeCtrl.getAllPositions);
