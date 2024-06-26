@@ -209,9 +209,8 @@ async function getAllMeetings(req, res) {
  
     const allmeet = await Meet.aggregate([
       {
-        $match: matchStage
+        $match: matchStage // Assuming matchStage is defined elsewhere
       },
-    
       {
         $unwind: "$sendTo" // Unwind the sendTo array to prepare for lookup
       },
@@ -235,17 +234,19 @@ async function getAllMeetings(req, res) {
           meetLink: { $first: "$meetLink" },
           date: { $first: "$date" },
           from: { $first: "$from" },
-          sendTo: { $addToSet: "$sendTo" }, // Collect sendTo values into a set to avoid duplicates
           createdBy: { $first: "$createdBy" },
           createdAt: { $first: "$createdAt" },
+          sendTo: { $addToSet: "$sendTo" }, // Collect sendTo values into a set to avoid duplicates
           userEmails: { $addToSet: "$userDetails.email" }, // Collect emails into a set to avoid duplicates
         }
       },
-          {$sort: { createdAt: -1 }},
-    ])
-      .skip(offset)
-      .limit(ITEMS_PER_PAGE);
-
+      { $sort: { createdAt: -1 } },
+      { $skip: offset },
+      { $limit: ITEMS_PER_PAGE }
+    ]);
+    
+    console.log(allmeet); // Output the result to check if userDetails are populated
+    
    
     const totalMeetingResult = await Meet.aggregate([
       {
