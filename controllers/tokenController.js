@@ -246,11 +246,11 @@ async function notifycation(title,body) {
         }))
       });
     }
-
-    res.status(200).send('Notifications sent successfully');
+    return { success: true, message: "Notification sent successfully" };
+ 
   } catch (error) {
     console.error('Error sending notifications:', error);
-    res.status(500).send('Error sending notifications');
+    return { success: false, message: error.message };
   }
 }
   module.exports={
