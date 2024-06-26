@@ -2,6 +2,7 @@ const Meet = require("../models/meeting");
 const mongoose = require("mongoose");
 // const moment = require('moment');
 //generate google link
+const sendEmail = require("../config/nodeMailer");
 const moment = require("moment-timezone");
 const { google } = require("googleapis");
 const ObjectId = require('mongoose').Types.ObjectId;
@@ -67,7 +68,41 @@ async function scheduleMeeting(req, res) {
       sendTo:req.body.sendTo,
       createdBy:req.params.id
     });
+ 
+    let emailData={
+      fromEmail :req.body.from,
+      toEmail:req.body.sendTo,
+      htmlContent:`<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${req.body.title}</title>
+</head>
+<body>
+    <p><strong>Subject:</strong> ${req.body.title}</p>
 
+    <p>Dear ${req.body.sendTo},</p>
+
+    <p>You are invited to attend the <strong>${req.body.title}</strong> </p>
+
+    <p><strong>Date:</strong> ${req.body.startTime}<br>
+    <strong>Time:</strong> ${req.body.endTime}<br>
+    <strong>Location:</strong> ${req.body.link}</p>
+
+    <h3>Action Required:</h3>
+  <p>
+    If you cannot attend, please inform <strong>[Contact Person]</strong> at <a href="mailto:${req.body.from}">${req.body.from}</a>.</p>
+
+    <p>Best regards,<br>
+   ${req.body.from}
+ 
+</body>
+</html>
+`,
+      subject: `Meeting for ${req.body.title}`
+    }
+    await sendEmail(emailData);
     await meeting.save();
     console.log("4", meeting.startTime);
 
