@@ -192,7 +192,7 @@ async function getAllMeetings(req, res) {
   };
 
   try {
-    const ITEMS_PER_PAGE = parseInt(req.query.pageCount)  // Default to 10 items per page if not specified
+    const ITEMS_PER_PAGE = parseInt(req.query.pageCount)  || 10// Default to 10 items per page if not specified
     const page = parseInt(req.query.pageNumber) || 1;
     const offset = (page - 1) * ITEMS_PER_PAGE;
     let fromDate = req.query.fromDate ? new Date(req.query.fromDate) : moment().startOf('month').toDate();
