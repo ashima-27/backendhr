@@ -12,6 +12,10 @@ const employeeSchema = new mongoose.Schema({
     required: true,
    
   },
+  empId:{
+      type: Number,
+    unique: true
+  },
   joiningDate: {
     type: Date,
     required: true

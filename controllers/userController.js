@@ -10,19 +10,22 @@ async function createUser(req, res) {
   try {
     console.log(req.body);
     const { email, password } = req.body;
+    const highestEmp = await Employee.findOne().sort('-empId').exec();
+    const newEmpId = highestEmp ? highestEmp.empId + 1 : 1;
+
     if (!email || !password) {
     
       return res
         .status(400)
         .json({ message: "Email and password are required" });
     }
-
+   
     let isUser = await Employee.findOne({ email }); 
     if (isUser) {
       return res.status(409).json("Employee Already Exists!");
     } else {
       const hashedPassword = await bcrypt.hash(password, 10); 
-      const newUser = new Employee({ email, password: hashedPassword }); 
+      const newUser = new Employee({ email, password: hashedPassword ,  empId: newEmpId},); 
       const result = await newUser.save();
       if (result) {
         return res
