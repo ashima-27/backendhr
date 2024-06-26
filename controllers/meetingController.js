@@ -219,9 +219,9 @@ async function getAllMeetings(req, res) {
               as: 'userDetails' 
             }
           },
-          // {
-          //   $unwind: "$userDetails", // Unwind the array of user details
-          // },
+          {
+            $unwind: "$userDetails", // Unwind the array of user details
+          },
           {
             $group: {
               _id: "$_id",
