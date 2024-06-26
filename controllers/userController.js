@@ -161,7 +161,7 @@ async function forgotPassword(req, res) {
       { new: true }
     );
     // Send email with reset link
-    const resetUrl = `http://localhost:3100/resetPassword?id=${resetToken}`;
+    const resetUrl = `process.env.FRONTEND_URL/resetPassword?id=${resetToken}`;
     const message = `You are receiving this email because you (or someone else) have requested the reset of a password. Please click on the following link, or paste this into your browser to complete the process: \n\n ${resetUrl}`;
     let emailData={
       fromEmail : 'duggalashima905@gmail.com',
