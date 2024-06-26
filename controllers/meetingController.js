@@ -226,6 +226,19 @@ async function getAllMeetings(req, res) {
         $unwind: "$userDetails" // Unwind the userDetails array to handle multiple employee matches
       },
       {
+        $project: {
+          _id: 1,
+          title: 1,
+          startTime: 1,
+          endTime: 1,
+          meetLink: 1,
+          date: 1,
+          from: 1,
+          sendTo: 1,
+          userEmails: "$userDetails.email"
+        }
+      },
+      {
         $group: {
           _id: "$_id",
           title: { $first: "$title" },
@@ -234,10 +247,10 @@ async function getAllMeetings(req, res) {
           meetLink: { $first: "$meetLink" },
           date: { $first: "$date" },
           from: { $first: "$from" },
-          createdBy: { $first: "$createdBy" },
-          createdAt: { $first: "$createdAt" },
           sendTo: { $addToSet: "$sendTo" }, // Collect sendTo values into a set to avoid duplicates
-          userEmails: { $addToSet: "$userDetails.email" }, // Collect emails into a set to avoid duplicates
+          userEmails: { $addToSet: "$userEmails" }, // Collect emails into a set to avoid duplicates
+          createdBy: { $first: "$createdBy" },
+          createdAt: { $first: "$createdAt" }
         }
       },
       { $sort: { createdAt: -1 } },
