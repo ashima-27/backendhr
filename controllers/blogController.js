@@ -207,15 +207,9 @@ async function updateBlog (req, res) {
   }
   try {
     let obj = {
-      blog_Title: req.body.blog_Title,
-      // blog_CreatedBy: req.body.blog_CreatedBy,
-      blog_Body: req.body.blog_Body,
-      blog_Type: req.body.blog_Type,
-      blog_wordCount:req.body.wordCount ,
-      blog_readingTime:req.body.readingTime ,
-    
+     ...req.body,
       blog_description: req.body.blog_Description,
-      image: req.body.image,
+    
       tags:req.body.selectedTag,
     }
     let result = await Blog.findOneAndUpdate(
