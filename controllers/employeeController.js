@@ -17,7 +17,9 @@ async function addEmployee(req, res) {
     console.log(req.body, req.file);
     const { email, role, department } = req.body;
     let isUser = await Employee.findOne({ email });
- 
+    const highestEmp = await Employee.findOne().sort('-empId').exec();
+    const newEmpId = highestEmp ? highestEmp.empId + 1 : 1;
+
     if (isUser) {
       return res.status(409).json("Employee Already Exists!");
     } else {
@@ -27,6 +29,7 @@ async function addEmployee(req, res) {
         image: picname,
         positionId: role,
         departmentId: department,
+        empId: newEmpId,role:req.body.permission,positionId:req.body.role
       });
 
       const savedEmployee = await newEmployee.save();
