@@ -138,9 +138,57 @@ async function updateMeeting(req,res){
         { $set: { ...req.body ,meetLink:req.body.link } },
         { new: true }
       );
-      console.log("up",respObj)
-      const sendTo = result.sendTo;
-      const emailPromises = sendTo.map(email => {
+      console.log("up",result.sendTo)
+
+      
+    let matchStage = {
+      _id: id 
+    };
+
+    console.log("Match Stage:", JSON.stringify(matchStage));
+
+    const allmeet = await Meet.aggregate([
+      {
+        $match: matchStage, 
+      },
+     
+      {
+        $lookup: {
+          from: 'employees',        
+          let: { sendToIds: { $map: { input: "$sendTo", as: "id", in: { $toObjectId: "$$id" } } } },
+          pipeline: [
+            { $match: { $expr: { $in: ["$_id", "$$sendToIds"] } } },
+            { $project: { email: 1 } }
+          ],
+          as: 'userDetails',
+        },
+      },
+      {
+        $addFields: {
+          userEmails: { $map: { input: "$userDetails", as: "user", in: "$$user.email" } }
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          startTime: 1,
+          endTime: 1,
+          meetLink: 1,
+          date: 1,
+          from: 1,
+          sendTo: 1,
+          userEmails: 1,
+          createdBy: 1,
+          createdAt: 1
+        }
+      },
+    
+    
+    ]);
+   console.log("send",allmeet[0].userEmails)
+      const sendToo= allmeet[0].userEmails
+      const emailPromises = sendToo.map(email => {
         const emailData = {
           fromEmail: result.from,
           toEmail: email,
