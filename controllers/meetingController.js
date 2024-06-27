@@ -192,13 +192,15 @@ async function getAllMeetings(req, res) {
   };
 
   try {
-    const ITEMS_PER_PAGE = parseInt(req.query.pageCount)  || 10// Default to 10 items per page if not specified
+    const ITEMS_PER_PAGE = parseInt(req.query.pageCount) || 10; // Default to 10 items per page if not specified
     const page = parseInt(req.query.pageNumber) || 1;
     const offset = (page - 1) * ITEMS_PER_PAGE;
-    let fromDate = req.query.fromDate ? new Date(req.query.fromDate) : moment().startOf('month').toDate();
-    let toDate = req.query.toDate ? new Date(req.query.toDate + " 23:59:59") : moment().endOf('month').toDate();
-    console.log(fromDate,toDate)
-    console.log(req.query,"allData")
+    const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : moment().startOf('month').toDate();
+    const toDate = req.query.toDate ? new Date(req.query.toDate + "T23:59:59") : moment().endOf('month').toDate();
+
+    console.log("From Date:", fromDate);
+    console.log("To Date:", toDate);
+
     let matchStage = {
       createdAt: {
         $gte: fromDate,
@@ -206,24 +208,28 @@ async function getAllMeetings(req, res) {
       },
     };
 
- 
+    console.log("Match Stage:", JSON.stringify(matchStage));
+
     const allmeet = await Meet.aggregate([
       {
-        $match: matchStage // Assuming matchStage is defined elsewhere
+        $match: matchStage, 
       },
-      {
-        $unwind: "$sendTo" // Unwind the sendTo array to prepare for lookup
-      },
+     
       {
         $lookup: {
-          from: 'employees', 
-          localField: 'sendTo',
-          foreignField: '_id',
-          as: 'userDetails'
-        }
+          from: 'employees',        
+          let: { sendToIds: { $map: { input: "$sendTo", as: "id", in: { $toObjectId: "$$id" } } } },
+          pipeline: [
+            { $match: { $expr: { $in: ["$_id", "$$sendToIds"] } } },
+            { $project: { email: 1 } }
+          ],
+          as: 'userDetails',
+        },
       },
       {
-        $unwind: "$userDetails" // Unwind the userDetails array to handle multiple employee matches
+        $addFields: {
+          userEmails: { $map: { input: "$userDetails", as: "user", in: "$$user.email" } }
+        }
       },
       {
         $project: {
@@ -235,28 +241,17 @@ async function getAllMeetings(req, res) {
           date: 1,
           from: 1,
           sendTo: 1,
-          userEmails: "$userDetails.email"
-        }
-      },
-      {
-        $group: {
-          _id: "$_id",
-          title: { $first: "$title" },
-          startTime: { $first: "$startTime" },
-          endTime: { $first: "$endTime" },
-          meetLink: { $first: "$meetLink" },
-          date: { $first: "$date" },
-          from: { $first: "$from" },
-          sendTo: { $addToSet: "$sendTo" }, // Collect sendTo values into a set to avoid duplicates
-          userEmails: { $addToSet: "$userEmails" }, // Collect emails into a set to avoid duplicates
-          createdBy: { $first: "$createdBy" },
-          createdAt: { $first: "$createdAt" }
+          userEmails: 1,
+          createdBy: 1,
+          createdAt: 1
         }
       },
       { $sort: { createdAt: -1 } },
       { $skip: offset },
-      { $limit: ITEMS_PER_PAGE }
+      { $limit: ITEMS_PER_PAGE },
     ]);
+
+   
     
     console.log(allmeet); // Output the result to check if userDetails are populated
     
@@ -331,7 +326,7 @@ async function getAllMeetingsById(req, res) {
     const allmeet = await Meet.aggregate([
       {
         $match: {
-          matchStage,  
+          ...matchStage,  
         }
       },
      
