@@ -223,7 +223,7 @@ async function updateMeeting(req,res){
   
       await Promise.all(emailPromises);
       respObj.IsSuccess = true;
-      respObj.Data = result;
+      respObj.Data = allmeet;
       respObj.Message = "Meeting Details Updated Successfully ";
       console.log("up",respObj)
       res.status(200).json(respObj);
