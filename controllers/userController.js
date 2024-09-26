@@ -50,6 +50,7 @@ const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    console.log("worng")
     if (!email || !password) {
       respObj.Message = "Enter fields properly";
 
@@ -87,7 +88,7 @@ const loginUser = async (req, res) => {
       return res.status(401).json(respObj);
     }
   } catch (error) {
-    console.log(error);
+    console.log("er",error);
     respObj.Message = "Server Error!";
     return res.status(500).json(respObj);
   }
@@ -147,7 +148,7 @@ async function forgotPassword(req, res) {
       return res.status(404).json({ error: 'User not found.' });
     }
 
-    // Generate a reset token
+    // Generate a  token
     const resetToken = crypto.randomBytes(32).toString('hex');
     const resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
     const resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
@@ -164,7 +165,7 @@ async function forgotPassword(req, res) {
       { new: true }
     );
     // Send email with reset link
-    const resetUrl = `${process.env.FRONTEND_URL}/resetPassword?id=${resetToken}`;
+    const resetUrl = `${process.env.BASE_URL}/resetPassword?id=${resetToken}`;
     const message = `You are receiving this email because you (or someone else) have requested the reset of a password. Please click on the following link, or paste this into your browser to complete the process: \n\n ${resetUrl}`;
     let emailData={
       fromEmail : 'duggalashima905@gmail.com',
