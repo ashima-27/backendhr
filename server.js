@@ -9,7 +9,14 @@ const app = express();
 const server = http.createServer(app);
 
 // Use CORS
-app.use(cors());
+const corsOptions = {
+  origin: '*',  
+  methods: ['GET', 'POST','PATCH', 'PUT', 'DELETE'],  
+  allowedHeaders: ['Content-Type', 'Authorization'],  
+  credentials: true,  
+};
+
+app.use(cors(corsOptions));
 
 // Routes setup
 let routes = require("./routes/index");
