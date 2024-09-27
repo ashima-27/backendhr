@@ -29,7 +29,7 @@ async function getAllTemplate(req, res) {
     let toDate = req.query.toDate
       ? new Date(req.query.toDate + " 23:59:59")
       : moment().endOf("month").toDate();
-    
+
     console.log('fromDate:', fromDate, 'toDate:', toDate);
 
     const searchCriteria = {
@@ -39,20 +39,24 @@ async function getAllTemplate(req, res) {
             { title: { $regex: query, $options: "i" } }
           ]
         },
-        { createdAt: { $gte: fromDate, $lte: toDate } }
+        { createdAt: { $gte: fromDate, $lte: toDate } } 
       ]
     };
 
     console.log('searchCriteria:', JSON.stringify(searchCriteria));
 
-    const templates = await Template.find({}).populate('createdBy');
-    console.log(templates);
+
+    const templates = await Template.find(searchCriteria)
+      .populate('createdBy') 
+      .skip(offset)         
+      .limit(ITEMS_PER_PAGE);
+
+    console.log('Fetched templates:', templates);
+
     
-
-    console.log('Aggregation result:', templates);  
-
     const totalCount = await Template.countDocuments(searchCriteria);
     console.log('Total count:', totalCount);
+
 
     const respObj = { Data: templates, totalCount };
     res.status(200).json(respObj);
