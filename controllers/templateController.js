@@ -7,11 +7,16 @@ async function createTemplate(req, res) {
     console.log("req.body", req.body);
     let id = new ObjectId(req.params.id);
 
+
+    if (typeof req.body.placeholder === 'string') {
+      req.body.placeholder = JSON.parse(req.body.placeholder);
+    }
+
     const newTemplate = new Template({ ...req.body, createdBy: id });
     const savedTemplate = await newTemplate.save();
     res.status(200).json(savedTemplate);
   } catch (error) {
-    console.log("errpr", error);
+    console.log("error", error);
     res.status(500).json({ message: error.message });
   }
 }
@@ -39,6 +44,8 @@ async function getAllTemplate(req, res) {
             { title: { $regex: query, $options: "i" } }
           ]
         },
+        {
+          Template_isDeleted:false          },
         { createdAt: { $gte: fromDate, $lte: toDate } } 
       ]
     };
