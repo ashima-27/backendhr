@@ -15,76 +15,54 @@ async function createTemplate(req, res) {
     res.status(500).json({ message: error.message });
   }
 }
+
 async function getAllTemplate(req, res) {
   try {
     const query = req.query.searchQuery || "";
     const page = parseInt(req.query.pageNumber) || 1;
     const ITEMS_PER_PAGE = parseInt(req.query.pageCount) || 10;
     const offset = (page - 1) * ITEMS_PER_PAGE;
+
     let fromDate = req.query.fromDate
       ? new Date(req.query.fromDate)
       : moment().startOf("month").toDate();
     let toDate = req.query.toDate
       ? new Date(req.query.toDate + " 23:59:59")
       : moment().endOf("month").toDate();
-    console.log(fromDate, toDate);
-
-    console.log("query", req.query);
+    
+    console.log('fromDate:', fromDate, 'toDate:', toDate);
 
     const searchCriteria = {
       $and: [
         {
           $or: [
-            { title: { $regex: query, $options: "i" } },
-        
-          ],
+            { title: { $regex: query, $options: "i" } }
+          ]
         },
-        { createdAt: { $gte: fromDate, $lte: toDate } },
-      ],
+        { createdAt: { $gte: fromDate, $lte: toDate } }
+      ]
     };
 
-    const templates = await Template.aggregate([
-      { $match: searchCriteria },
-      { $skip: offset },
-      { $limit: ITEMS_PER_PAGE },
-      {
-        $lookup: {
-          from: 'employees',
-          localField: 'createdBy',
-          foreignField: '_id',
-          as: 'employee',
-        }
-      },
-        {
-          $project: {
-            employeeName: '$employee.name',
-            employeeId:'$employee._id',
-            employeeEmail: '$employee.email',
-            templateName:'$template.title',
-            createdAt: 1 ,
-            status:1,
-            title:1,
-            template:1,
-            description:1,
-            placeholder:1,
-           
+    console.log('searchCriteria:', JSON.stringify(searchCriteria));
 
-        }
-        }
-      ]);
+    const templates = await Template.find({}).populate('createdBy');
+    console.log(templates);
     
 
-    console.log("Aggregation result:", templates); // Log the result for debugging
-    const totalCount = await Template.countDocuments(searchCriteria);
+    console.log('Aggregation result:', templates);  
 
-    const respObj = { Data: templates };
-    respObj.totalCount = totalCount;
-    res.status(200).json(respObj); // Send response with status 200
+    const totalCount = await Template.countDocuments(searchCriteria);
+    console.log('Total count:', totalCount);
+
+    const respObj = { Data: templates, totalCount };
+    res.status(200).json(respObj);
+
   } catch (error) {
-    console.error("Error during aggregation:", error); // Log error for debugging
-    res.status(500).json({ error: "Internal Server Error" }); // Send error response
+    console.error('Error during aggregation:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 }
+
 async function updateTemplate(req,res){
     let respObj = {
       IsSuccess: false,
