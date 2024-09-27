@@ -347,6 +347,7 @@ async function deleteMeeting(req,res){
 
 }
 
+
 async function getAllMeetingsById(req, res) {
   let respObj = {
     Data: null,
@@ -354,13 +355,12 @@ async function getAllMeetingsById(req, res) {
   };
 
   try {
-    const ITEMS_PER_PAGE = parseInt(req.query.pageCount)  || 10// Default to 10 items per page if not specified
+    const ITEMS_PER_PAGE = parseInt(req.query.pageCount) || 10; // Default to 10 items per page if not specified
     const page = parseInt(req.query.pageNumber) || 1;
     const offset = (page - 1) * ITEMS_PER_PAGE;
     let fromDate = req.query.fromDate ? new Date(req.query.fromDate) : moment().startOf('month').toDate();
     let toDate = req.query.toDate ? new Date(req.query.toDate + " 23:59:59") : moment().endOf('month').toDate();
-    console.log(fromDate,toDate)
-    console.log(req.query,"allData")
+
     let matchStage = {
       createdAt: {
         $gte: fromDate,
@@ -368,24 +368,36 @@ async function getAllMeetingsById(req, res) {
       },
       sendTo: { $in: [req.params.id] }
     };
- console.log("match",matchStage)
-   let id=  new ObjectId(req.params.id);
-   console.log(id)
+
     const allmeet = await Meet.aggregate([
       {
-        $match: {
-          ...matchStage,  
-        }
+        $match: matchStage,
       },
-     
       { $sort: { createdAt: -1 } },
       { $skip: offset },
       { $limit: ITEMS_PER_PAGE }
     ]);
-    
-    console.log(allmeet); // Output the result to check if userDetails are populated
-    
-   
+
+    // Extract sendTo IDs from allmeet
+    const sendToIds = allmeet.flatMap(meeting => meeting.sendTo); // Flatten in case of multiple sendTo arrays
+
+    // Fetch names of employees corresponding to the sendTo IDs
+    const employees = await Employees.find({ _id: { $in: sendToIds } }, 'email'); // Only retrieve names
+
+    // Map employee IDs to names for easier reference
+    const employeeMap = employees.reduce((acc, emp) => {
+      acc[emp._id] = emp.email;
+      return acc;
+    }, {});
+
+    // Add employee names to meetings
+    const meetingsWithNames = allmeet.map(meeting => {
+      return {
+        ...meeting,
+        userEmails: meeting.sendTo.map(id => employeeMap[id] || null), // Get names or null if not found
+      };
+    });
+
     const totalMeetingResult = await Meet.aggregate([
       {
         $match: matchStage,
@@ -397,7 +409,7 @@ async function getAllMeetingsById(req, res) {
 
     const totalMeeting = totalMeetingResult.length > 0 ? totalMeetingResult[0].totalMeeting : 0;
 
-    respObj.Data = allmeet;
+    respObj.Data = meetingsWithNames; // Use the modified meetings with names
     respObj.totalMeeting = totalMeeting;
 
     res.status(200).json(respObj);
@@ -405,6 +417,7 @@ async function getAllMeetingsById(req, res) {
     res.status(500).json({ error: error.message });
   }
 }
+
 
 module.exports = {
   scheduleMeeting,
