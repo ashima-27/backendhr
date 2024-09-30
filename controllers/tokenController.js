@@ -202,53 +202,60 @@ async function getAllNotification(req, res) {
   }
 }
 
-async function notifycation({title,body}) {
+async function notifycation({ title, body }) {
   try {
-    console.log("hi i m workig ",title,body)
-   
-  
+    console.log("Notification title:", title, "Body:", body);
+
+    // Fetch tokens from the database
     const tokens = await Token.find({}).select('token -_id').lean();
     if (!tokens.length) {
       console.log('No tokens found');
-      return res.status(400).json({ message: 'No tokens found' });
+      return { success: false, message: 'No tokens found' };
     }
 
-    const savenoti = new Notification({title,body});
+    // Save the notification to the database
+    const savenoti = new Notification({ title, body });
     await savenoti.save();
-    console.log("Saved Notification:", savenoti);
+    console.log("Notification saved to DB:", savenoti);
 
+    // Prepare messages for FCM
     const messages = tokens.map(token => ({
       notification: { title, body },
       token: token.token
     }));
+    console.log("Prepared messages for FCM:", messages);
 
-    console.log("Messages:", messages);
+    // Send all messages using Firebase admin.messaging()
+    const response = await admin.messaging().sendAll(messages);
+    console.log('FCM sendAll response:', response);
 
- const response = await admin.messaging().sendAll(messages);
-
-
-    console.log('Successfully sent messages:', response);
-
-   const failedMessages = response.responses.filter(resp => !resp.success);
+    // Identify and log failed messages
+    const failedMessages = response.responses.filter(resp => !resp.success);
     if (failedMessages.length > 0) {
       failedMessages.forEach((resp, idx) => {
         console.error(`Error sending message to token ${messages[idx].token}:`, resp.error);
       });
-      return res.status(500).json({
+
+      return {
+        success: false,
         message: 'Some notifications failed to send',
         errors: failedMessages.map((resp, idx) => ({
           token: messages[idx].token,
           error: resp.error.message
         }))
-      });
+      };
     }
+
+    // Return success if all notifications were sent successfully
     return { success: true, message: "Notification sent successfully" };
- 
+
   } catch (error) {
+    // Catch and log errors during the process
     console.error('Error sending notifications:', error);
     return { success: false, message: error.message };
   }
 }
+
   module.exports={
     saveToken,
     notify,

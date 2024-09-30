@@ -116,61 +116,69 @@ async function getBlogById (req, res) {
      res.status(500).json(respObj)
   }
 }
-async function createBlog (req, res) {
+async function createBlog(req, res) {
   let respObj = {
     IsSuccess: false,
     Message: 'OK.',
-    Data: null 
-  }
+    Data: null
+  };
+
   try {
-    console.log("body",req.body)
-    const id=new ObjectId(req.params.id)
+    console.log("Request Body:", req.body);
+    const id = new ObjectId(req.params.id);
     let obj = {
       blog_Title: req.body.blog_Title,
-      blog_CreatedBy:id,
+      blog_CreatedBy: id,
       blog_Body: req.body.blog_Body,
       blog_Type: req.body.blog_Type,
       blog_description: req.body.blog_Description,
-     image:req.body.image,
-      blog_wordCount:req.body.wordCount ,
-      blog_readingTime:req.body.readingTime ,
-      tags:req.body.selectedTag,
-      isDraft:false,
-    }
+      image: req.body.image,
+      blog_wordCount: req.body.wordCount,
+      blog_readingTime: req.body.readingTime,
+      tags: req.body.selectedTag,
+      isDraft: false,
+    };
 
+    // Check if the blog is a new entry
     if (req.body.Draft === false && req.body.blogId === "") {
-      let newBlog = await new Blog(obj).save()
-    
-      respObj.IsSuccess = true
-      respObj.Message = 'Blog Created Successfully'
-      respObj.Data = newBlog
-      res.status(200).json(respObj)
-    } else {
-      if(req.body.blogId !== ""){
+      let newBlog = await new Blog(obj).save();
+      respObj.IsSuccess = true;
+      respObj.Message = 'Blog Created Successfully';
+      respObj.Data = newBlog;
+    } else if (req.body.blogId !== "") {
       const createdByObjectId = new ObjectId(req.body.blogId);
-      await Blog.findOneAndUpdate(
+      const updatedBlog = await Blog.findOneAndUpdate(
         { _id: createdByObjectId },
         { $set: obj },
-        { new: true },
-      
-      )}
-     
-     
+        { new: true }
+      );
+      respObj.IsSuccess = true;
+      respObj.Message = 'Blog Updated Successfully';
+      respObj.Data = updatedBlog;
     }
-    let msg = `${req.body.blog_Title} Blog is created`;
-   
-    const notifyResult = await notify.notifycation({ title: req.body.blog_Title, body: req.body.blog_Description });
+
+    // Notify after blog creation or update
+    const notifyResult = await notify.notifycation({
+      title: req.body.blog_Title,
+      body: req.body.blog_Description
+    });
     console.log('Notify Result:', notifyResult);
 
-    respObj.IsSuccess = true
-    respObj.Message = 'Blog Created from Draft Successfully'
-    res.status(200).json(respObj)
+    // Final success message
+    respObj.IsSuccess = true;
+    respObj.Message = 'Blog operation completed successfully';
+    
+    // Send response only once
+    return res.status(200).json(respObj);
+    
   } catch (err) {
-    respObj.error = err
-    ;(respObj.Message = err.message || 'Error while processing db query'),
-      res.status(500).json(respObj)
+    // Handle any errors that occur during the process
+    respObj.error = err;
+    respObj.Message = err.message || 'Error while processing db query';
+    return res.status(500).json(respObj);
   }
 }
+
 
 async function deleteBlog (req, res) {
   let respObj = {
